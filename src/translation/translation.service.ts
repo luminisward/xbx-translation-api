@@ -4,6 +4,7 @@ import { getConnection, Repository } from 'typeorm';
 import { UpdateTranslationDto } from './dto/update-translation.dto';
 import { Changes } from './entities/changes.entity';
 import { Translation } from './entities/translation.entity';
+import { BdatService } from '../bdat/bdat.service';
 
 @Injectable()
 export class TranslationService {
@@ -12,6 +13,7 @@ export class TranslationService {
     private translationRepository: Repository<Translation>,
     @InjectRepository(Changes)
     private changesRepository: Repository<Changes>,
+    private readonly bdatService: BdatService,
   ) {}
 
   findAll() {
@@ -36,6 +38,11 @@ export class TranslationService {
       }
       currentTranslation.text = text;
     } else {
+      const oldCnRow = await this.bdatService.queryTableRow('cn', table, row_id);
+      if (oldCnRow.name === text) {
+        return 'Same as bdat';
+      }
+
       currentTranslation = this.translationRepository.create();
       currentTranslation.text = text;
       currentTranslation.table = table;

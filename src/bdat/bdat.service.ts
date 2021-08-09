@@ -24,9 +24,7 @@ export class BdatService {
   }
 
   async getTables(): Promise<string[]> {
-    const { rows } = await pool.query(
-      `SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname = 'jp100'`,
-    );
+    const { rows } = await pool.query(`SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname = 'jp100'`);
     return rows.map(({ tablename }) => tablename);
   }
 
@@ -39,18 +37,17 @@ export class BdatService {
     return await pool.query(`select * from "${table}"`);
   }
 
-  async upsertCnTranslate({ bdat, table, row_id, text }) {
+  async queryTableRow(language: string, table: string, row_id: number) {
     await this.checkTableExist(table);
-
-    const incomingTableName = `${bdat}.${table}`;
-
-    const updateQuery = `UPDATE cn."${incomingTableName}" SET name = $1,  WHERE row_id = $2`;
-    const insertQuery = `INSERT INTO cn."${incomingTableName}" (text, ) VALUES($1, $2) RETURNING *`;
-
-    const insertChangesQuery = `INSERT INTO "changes" (user, text) VALUES($1, $2) RETURNING *`;
-
-    pool.query(insertChangesQuery, [1]);
-
-    console.log({ bdat, table, row_id, text });
+    const schemas = this.schemaMap[language] || this.schemaMap.jp;
+    await pool.query(`SET search_path TO ${schemas.join(',')};`);
+    const { rows } = await pool.query(`select * from "${table}" where row_id = ${row_id}`);
+    if (rows.length === 1) {
+      return rows[0];
+    }
+    if (rows.length === 0) {
+      return;
+    }
+    throw new Error(`table: ${table} row_id: ${row_id} result rows length > 1`);
   }
 }

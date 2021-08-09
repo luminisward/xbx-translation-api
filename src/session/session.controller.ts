@@ -14,6 +14,9 @@ export class SessionController {
     }
 
     const user = await this.userService.findOneByUsernameWithPassword(username);
+    if (!user) {
+      throw new BadRequestException("Can't find user " + username);
+    }
     const hash = user.password;
     const result = await bcrypt.compare(password, hash);
     if (result) {

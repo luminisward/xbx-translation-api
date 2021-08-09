@@ -27,7 +27,7 @@ export class UserService {
   }
 
   findOneByUsernameWithPassword(username: string) {
-    return this.usersRepository.findOneOrFail({ username });
+    return this.usersRepository.findOne({ username });
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {

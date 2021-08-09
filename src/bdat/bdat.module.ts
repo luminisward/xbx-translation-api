@@ -5,5 +5,6 @@ import { BdatController } from './bdat.controller';
 @Module({
   providers: [BdatService],
   controllers: [BdatController],
+  exports: [BdatService],
 })
 export class BdatModule {}
