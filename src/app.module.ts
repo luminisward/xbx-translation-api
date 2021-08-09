@@ -6,6 +6,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserModule } from './user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SessionModule } from './session/session.module';
+import { TranslationModule } from './translation/translation.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { SessionModule } from './session/session.module';
     BdatModule,
     UserModule,
     SessionModule,
+    TranslationModule,
   ],
   controllers: [AppController],
   providers: [AppService],
