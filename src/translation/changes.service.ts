@@ -16,7 +16,7 @@ export class ChangesService {
   ) {}
 
   findAll() {
-    return `This action returns all translation`;
+    return this.changesRepository.find({ order: { id: 'DESC' }, take: 5000 });
   }
 
   findOne(conditions) {

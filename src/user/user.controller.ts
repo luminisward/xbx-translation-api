@@ -10,11 +10,11 @@ export class UserController {
   constructor(private readonly userService: UserService, private readonly jwtService: JwtService) {}
 
   @Post()
-  @HttpCode(204)
   async create(@Body() createUserDto: CreateUserDto) {
     const { password } = createUserDto;
     createUserDto.password = await bcrypt.hash(password, 10);
-    return await this.userService.create(createUserDto);
+    await this.userService.create(createUserDto);
+    return 'Success';
   }
 
   @Get()

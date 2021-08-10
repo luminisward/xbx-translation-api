@@ -14,7 +14,7 @@ export class AuthGuard implements CanActivate {
     const { authorization } = headers;
     try {
       const decoded = await this.jwtService.verifyAsync(authorization.replace('Bearer ', ''));
-      return decoded.permission > 1;
+      return decoded.permission > 0;
     } catch (error) {
       return false;
     }

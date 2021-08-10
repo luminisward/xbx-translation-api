@@ -8,6 +8,11 @@ import { Changes } from './entities/changes.entity';
 export class ChangesController {
   constructor(private readonly changesService: ChangesService, private readonly userService: UserService) {}
 
+  @Get()
+  async findAll() {
+    return await this.changesService.findAll();
+  }
+
   @Get(':table')
   async queryTranslatedTable(@Param('table') table: string, @Query('username') username) {
     const conditions: FindConditions<Changes> = { table };
@@ -19,7 +24,7 @@ export class ChangesController {
   }
 
   @Get(':table/:id')
-  async findOne(@Param('table') table: string, @Param('id') row_id: number, @Query('username') username) {
+  async findHistory(@Param('table') table: string, @Param('id') row_id: number, @Query('username') username) {
     return await this.changesService.find({ table, row_id });
   }
 }
