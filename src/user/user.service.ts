@@ -22,8 +22,8 @@ export class UserService {
 
   async findOneByUsername(username: string) {
     const user = await this.findOneByUsernameWithPassword(username);
-    delete user.password;
-    return user;
+    const { password, ...others } = user;
+    return others;
   }
 
   findOneByUsernameWithPassword(username: string) {

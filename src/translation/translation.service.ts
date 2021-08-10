@@ -5,6 +5,7 @@ import { UpdateTranslationDto } from './dto/update-translation.dto';
 import { Changes } from './entities/changes.entity';
 import { Translation } from './entities/translation.entity';
 import { BdatService } from '../bdat/bdat.service';
+import { User } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class TranslationService {
@@ -28,7 +29,7 @@ export class TranslationService {
     return this.translationRepository.find(conditions);
   }
 
-  async upsert(updateTranslationDto: UpdateTranslationDto) {
+  async upsert(updateTranslationDto: UpdateTranslationDto, user: User, ip: string) {
     const { table, row_id, text } = updateTranslationDto;
     let currentTranslation = await this.translationRepository.findOne({ table, row_id });
 
@@ -53,7 +54,8 @@ export class TranslationService {
     change.text = text;
     change.row_id = row_id;
     change.table = table;
-    change.user;
+    change.user = user;
+    change.ip = ip;
 
     await getConnection().transaction(async (transactionalEntityManager) => {
       await transactionalEntityManager.save(currentTranslation);

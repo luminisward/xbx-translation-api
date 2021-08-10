@@ -1,15 +1,17 @@
-import { Controller, Get, Body, Param, Delete, Put } from '@nestjs/common';
+import { Controller, Get, Body, Param, Delete, Put, UseGuards, Headers, Ip } from '@nestjs/common';
 import { TranslationService } from './translation.service';
 import { UpdateTranslationDto } from './dto/update-translation.dto';
+import { AuthGuard } from './auth.guard';
+import { JwtService } from '@nestjs/jwt';
+import { UserService } from 'src/user/user.service';
 
 @Controller('translation')
 export class TranslationController {
-  constructor(private readonly translationService: TranslationService) {}
-
-  @Get()
-  findAll() {
-    return this.translationService.findAll();
-  }
+  constructor(
+    private readonly translationService: TranslationService,
+    private readonly jwtService: JwtService,
+    private readonly userService: UserService,
+  ) {}
 
   @Get(':table')
   async queryTranslatedTable(@Param('table') table: string) {
@@ -23,12 +25,11 @@ export class TranslationController {
   }
 
   @Put()
-  update(@Body() updateTranslationDto: UpdateTranslationDto) {
-    return this.translationService.upsert(updateTranslationDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.translationService.remove(+id);
+  @UseGuards(AuthGuard)
+  async update(@Body() updateTranslationDto: UpdateTranslationDto, @Headers('authorization') authorization, @Ip() ip) {
+    const decoded = await this.jwtService.verifyAsync(authorization.replace('Bearer ', ''));
+    const { username } = decoded;
+    const user = await this.userService.findOneByUsernameWithPassword(username);
+    return await this.translationService.upsert(updateTranslationDto, user, ip);
   }
 }

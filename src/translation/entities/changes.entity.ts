@@ -6,7 +6,7 @@ export class Changes {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { nullable: false })
   user: User;
 
   @Column('text')
@@ -20,4 +20,7 @@ export class Changes {
 
   @Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   time: string;
+
+  @Column({ select: false })
+  ip: string;
 }
