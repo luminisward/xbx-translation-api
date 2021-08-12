@@ -34,7 +34,8 @@ export class BdatService {
     const schemas = this.schemaMap[language] || this.schemaMap.jp;
 
     await pool.query(`SET search_path TO ${schemas.join(',')};`);
-    return await pool.query(`select * from "${table}"`);
+    const { rows } = await pool.query(`select * from "${table}"`);
+    return rows;
   }
 
   async queryTableRow(language: string, table: string, row_id: number) {

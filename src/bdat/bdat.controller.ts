@@ -8,13 +8,12 @@ export class BdatController {
   @Get('all')
   async getTables(): Promise<string[]> {
     const rows = await this.bdatService.getTables();
-    return rows.filter((rowName) => rowName.includes('_ms'));
+    return rows.filter((rowName) => rowName.includes('_ms')).sort();
   }
 
   @Get(':tableName')
   async getOneTable(@Query('language') language: string, @Param('tableName') name) {
-    const { rows } = await this.bdatService.queryTable(language || 'jp', name);
-    return rows;
+    return await this.bdatService.queryTable(language || 'jp', name);
   }
   @Get(':tableName/:row_id')
   async getOneTableRow(@Query('language') language: string, @Param('tableName') name, @Param('row_id') row_id) {

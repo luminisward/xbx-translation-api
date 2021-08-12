@@ -23,4 +23,7 @@ export class Changes {
 
   @Column({ select: false })
   ip: string;
+
+  @Column({ default: false })
+  isBatch: boolean;
 }

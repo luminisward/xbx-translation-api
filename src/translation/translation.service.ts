@@ -29,7 +29,7 @@ export class TranslationService {
     return this.translationRepository.find(conditions);
   }
 
-  async upsert(updateTranslationDto: UpdateTranslationDto, user: User, ip: string) {
+  async upsert(updateTranslationDto: UpdateTranslationDto, user: User, ip: string, isBatch = false) {
     const { table, row_id, text } = updateTranslationDto;
     let currentTranslation = await this.translationRepository.findOne({ table, row_id });
 
@@ -56,6 +56,7 @@ export class TranslationService {
     change.table = table;
     change.user = user;
     change.ip = ip;
+    change.isBatch = isBatch;
 
     await getConnection().transaction(async (transactionalEntityManager) => {
       await transactionalEntityManager.save(currentTranslation);
