@@ -66,6 +66,16 @@ export class TranslationService {
     return 'Success';
   }
 
+  async getMergedTranslatedTable(table: string) {
+    const originalCnRows = await this.bdatService.queryTable('cn', table);
+    const translatedRows = await this.find({ table });
+
+    return originalCnRows.map((row) => {
+      const translatedRow = translatedRows.find((translatedRow) => translatedRow.row_id === row.row_id);
+      return { row_id: row.row_id, text: translatedRow?.text || row.name };
+    });
+  }
+
   remove(id: number) {
     return `This action removes a #${id} translation`;
   }

@@ -13,5 +13,6 @@ import { ChangesService } from './changes.service';
   imports: [TypeOrmModule.forFeature([Changes, Translation]), BdatModule, UserModule],
   controllers: [TranslationController, ChangesController],
   providers: [TranslationService, ChangesService],
+  exports: [TranslationService],
 })
 export class TranslationModule {}

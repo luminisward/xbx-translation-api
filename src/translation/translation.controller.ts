@@ -16,9 +16,8 @@ export class TranslationController {
   ) {}
 
   @Get(':table')
-  async queryTranslatedTable(@Param('table') table: string) {
-    const rows = await this.translationService.find({ table });
-    return rows.sort((row1, row2) => row1.row_id - row2.row_id);
+  queryTranslatedTable(@Param('table') table: string) {
+    return this.translationService.getMergedTranslatedTable(table);
   }
 
   @Get(':table/:id')

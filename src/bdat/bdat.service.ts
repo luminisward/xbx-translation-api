@@ -28,6 +28,19 @@ export class BdatService {
     return rows.map(({ tablename }) => tablename);
   }
 
+  async getTablesMap() {
+    const tables = await this.getTables();
+    const ret = {} as Record<string, string[]>;
+    for (const table of tables) {
+      const [prefix, suffix] = table.split('.');
+      if (!ret[prefix]) {
+        ret[prefix] = [];
+      }
+      ret[prefix].push(suffix);
+    }
+    return ret;
+  }
+
   async queryTable(language: string, table: string) {
     await this.checkTableExist(table);
 

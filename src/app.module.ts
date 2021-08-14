@@ -7,6 +7,7 @@ import { UserModule } from './user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SessionModule } from './session/session.module';
 import { TranslationModule } from './translation/translation.module';
+import { ExcelModule } from './excel/excel.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { TranslationModule } from './translation/translation.module';
     UserModule,
     SessionModule,
     TranslationModule,
+    ExcelModule,
   ],
   controllers: [AppController],
   providers: [AppService],
