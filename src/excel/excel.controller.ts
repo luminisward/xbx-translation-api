@@ -13,17 +13,6 @@ export class ExcelController {
     private readonly bdatService: BdatService,
   ) {}
 
-  @Get('test')
-  @Header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-  build(@Res() res) {
-    const data = this.excelService.parseFile();
-    this.excelService.build(data);
-    const readable = new Readable();
-    readable.push(this.excelService.build(data));
-    readable.push(null);
-    readable.pipe(res);
-  }
-
   @Get(':tablePrefix')
   @Header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
   async getTableExcel(@Res() res: Response, @Req() req: Request) {
