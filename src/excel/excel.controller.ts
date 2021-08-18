@@ -1,17 +1,37 @@
-import { Controller, Get, Header, Post, Put, Req, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  Header,
+  Headers,
+  InternalServerErrorException,
+  Ip,
+  Post,
+  Req,
+  Res,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { ExcelService } from './excel.service';
 import { Readable } from 'stream';
 import { Request, Response } from 'express';
 import { TranslationService } from 'src/translation/translation.service';
 import { BdatService } from 'src/bdat/bdat.service';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { UpdateTranslationDto } from '../translation/dto/update-translation.dto';
+import { UserService } from '../user/user.service';
+import { JwtService } from '@nestjs/jwt';
 
 @Controller('excel')
 export class ExcelController {
+  isUploadRunning = false;
+
   constructor(
     private readonly excelService: ExcelService,
     private readonly translationService: TranslationService,
     private readonly bdatService: BdatService,
+    private readonly userService: UserService,
+    private readonly jwtService: JwtService,
   ) {}
 
   @Get(':tablePrefix')
@@ -42,9 +62,61 @@ export class ExcelController {
 
   @Post()
   @UseInterceptors(FileInterceptor('file'))
-  async updateTranslationTable(@UploadedFile() file: Express.Multer.File) {
-    const tableName = file.originalname.split('.')[0];
+  async updateTranslationTable(
+    @UploadedFile() file: Express.Multer.File,
+    @Headers('authorization') authorization,
+    @Ip() ip,
+  ) {
+    const decoded = await this.jwtService.verifyAsync(authorization.replace('Bearer ', ''));
+    const { username } = decoded;
+    const user = await this.userService.findOneByUsernameWithPassword(username);
+    if (!user) {
+      throw new BadRequestException("can't find user: " + username);
+    }
+
+    if (this.isUploadRunning) {
+      return 'Another task is running.';
+    }
+
+    this.isUploadRunning = true;
+    const tableFileName = file.originalname.split('.')[0];
     const data = this.excelService.parse(file.buffer);
-    return tableName;
+
+    (async () => {
+      try {
+        for (const sheet of data) {
+          const table = `${tableFileName}.${sheet.name}`;
+
+          let textColumnIndex = 0;
+
+          for (const row of sheet.data) {
+            if (row[0] === '列名') {
+              textColumnIndex = row.findIndex((val) => val === 'name');
+              continue;
+            }
+            const key = row[0] as string;
+
+            if (key && isFinite(Number(key))) {
+              if (textColumnIndex === 0) {
+                throw new InternalServerErrorException('textColumnIndex is 0');
+              }
+
+              const value = row[textColumnIndex] as string;
+              const row_id = Number(key);
+              const singleRowUpdateTranslationDto = new UpdateTranslationDto();
+              singleRowUpdateTranslationDto.text = value || '';
+              singleRowUpdateTranslationDto.row_id = row_id;
+              singleRowUpdateTranslationDto.table = table;
+              await this.translationService.upsert(singleRowUpdateTranslationDto, user, ip, true);
+            }
+          }
+          console.log(`update ${table}`);
+        }
+      } finally {
+        this.isUploadRunning = false;
+      }
+    })();
+
+    return 'Task start running.';
   }
 }
