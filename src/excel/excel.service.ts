@@ -3,8 +3,9 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class ExcelService {
-  parse(data) {
-    return xlsx.parse(data);
+  parse(file) {
+    const data = xlsx.parse(file);
+    return data;
   }
 
   build(sheets: Array<{ name: string; data: any[][]; options?: {} | undefined }>) {

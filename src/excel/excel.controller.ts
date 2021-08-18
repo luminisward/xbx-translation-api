@@ -1,9 +1,10 @@
-import { Controller, Get, Header, Post, Req, Res } from '@nestjs/common';
+import { Controller, Get, Header, Post, Put, Req, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { ExcelService } from './excel.service';
 import { Readable } from 'stream';
 import { Request, Response } from 'express';
 import { TranslationService } from 'src/translation/translation.service';
 import { BdatService } from 'src/bdat/bdat.service';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('excel')
 export class ExcelController {
@@ -37,5 +38,13 @@ export class ExcelController {
     readable.push(buffer);
     readable.push(null);
     readable.pipe(res);
+  }
+
+  @Post()
+  @UseInterceptors(FileInterceptor('file'))
+  async updateTranslationTable(@UploadedFile() file: Express.Multer.File) {
+    const tableName = file.originalname.split('.')[0];
+    const data = this.excelService.parse(file.buffer);
+    return tableName;
   }
 }
