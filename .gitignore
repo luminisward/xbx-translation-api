@@ -36,3 +36,5 @@ lerna-debug.log*
 
 # local files
 *.local
+
+xlsx

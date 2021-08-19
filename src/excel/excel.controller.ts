@@ -21,6 +21,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { UpdateTranslationDto } from '../translation/dto/update-translation.dto';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
+import * as fs from 'fs/promises';
 
 @Controller('excel')
 export class ExcelController {
@@ -40,7 +41,7 @@ export class ExcelController {
     const { tablePrefix } = req.params;
     const allTable = await this.bdatService.getTablesMap();
 
-    const tableData = await Promise.all(
+    const translatedData = await Promise.all(
       allTable[tablePrefix].map(async (tableSuffix) => {
         const translatedRows = await this.translationService.getMergedTranslatedTable(`${tablePrefix}.${tableSuffix}`);
 
@@ -51,7 +52,29 @@ export class ExcelController {
       }),
     );
 
-    const buffer = this.excelService.build(tableData);
+    const filePath = `${process.cwd()}/xlsx/${tablePrefix}.xlsx`;
+    const originFileBuffer = await fs.readFile(filePath);
+    const originData = this.excelService.parse(originFileBuffer);
+
+    for (const originSheet of originData) {
+      let textColumnIndex = 0;
+
+      for (const originRow of originSheet.data) {
+        if (originRow[0] === '列名') {
+          textColumnIndex = originRow.findIndex((val) => val === 'name');
+          continue;
+        }
+
+        const translatedRow = translatedData
+          .find((sheet) => sheet.name === originSheet.name)
+          ?.data.find((row) => row[0] === originRow[0]);
+        if (translatedRow && translatedRow[textColumnIndex]) {
+          originRow[textColumnIndex] = translatedRow[textColumnIndex];
+        }
+      }
+    }
+
+    const buffer = this.excelService.build(originData);
 
     res.setHeader('Content-Disposition', `attachment; filename=${tablePrefix}.xlsx`);
     const readable = new Readable();
