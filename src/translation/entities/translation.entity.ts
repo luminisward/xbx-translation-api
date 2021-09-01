@@ -11,4 +11,7 @@ export class Translation {
 
   @Column()
   text: string;
+
+  @Column({ default: 0 })
+  change_times: number;
 }

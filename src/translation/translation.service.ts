@@ -38,6 +38,7 @@ export class TranslationService {
         return 'Same';
       }
       currentTranslation.text = text;
+      currentTranslation.change_times = currentTranslation.change_times + 1;
     } else {
       const oldCnRow = await this.bdatService.queryTableRow('cn', table, row_id);
       if (oldCnRow.name === text) {
