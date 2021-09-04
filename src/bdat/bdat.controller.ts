@@ -7,8 +7,7 @@ export class BdatController {
 
   @Get('all')
   async getTables(): Promise<string[]> {
-    const rows = await this.bdatService.getTables();
-    return rows.filter((rowName) => rowName.includes('_ms')).sort();
+    return this.bdatService.getMsTables();
   }
 
   @Get(':tableName')
