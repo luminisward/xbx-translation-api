@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   CACHE_MANAGER,
   CacheInterceptor,
   Controller,
@@ -40,6 +41,10 @@ export class SearchController {
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit = 10,
   ) {
+    if (!text || !language) {
+      throw new BadRequestException('query text or language required.');
+    }
+
     if (table) {
       return await this.bdatService.fullTextSearch(language, [table], text);
     }
