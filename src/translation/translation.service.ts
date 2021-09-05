@@ -6,6 +6,7 @@ import { Changes } from './entities/changes.entity';
 import { Translation } from './entities/translation.entity';
 import { BdatService } from '../bdat/bdat.service';
 import { User } from 'src/user/entities/user.entity';
+import { IPaginationOptions, paginate } from 'nestjs-typeorm-paginate';
 
 @Injectable()
 export class TranslationService {
@@ -79,5 +80,13 @@ export class TranslationService {
 
   remove(id: number) {
     return `This action removes a #${id} translation`;
+  }
+
+  fullTextSearch(text: string, options: IPaginationOptions) {
+    const builder = this.translationRepository
+      .createQueryBuilder('translation')
+      .where('translation.text like :text', { text: `%${text}%` });
+
+    return paginate(builder, options);
   }
 }
