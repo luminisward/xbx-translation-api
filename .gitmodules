@@ -1,3 +1,3 @@
 [submodule "xlsx"]
 	path = xlsx
-	url = git@github.com:luminisward/xbx-translation-xlsx.git
+	url = ../xbx-translation-xlsx.git
